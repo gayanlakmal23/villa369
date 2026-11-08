@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172d27">
+  <meta name="description" content="Explore the Villa 369 food menu and order directly through WhatsApp.">
+  <title>VILLA 369 | Food Menu</title>
+  <style>
+    :root{--green:#17352c;--green2:#20c768;--cream:#f7f5ef;--ink:#202522;--muted:#747b76}
+    *{box-sizing:border-box}
+    body{margin:0;background:#f4f5f3;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+    header{background:var(--green);color:white;padding:22px 18px 18px;text-align:center}
+    .brand{font-family:Georgia,serif;font-size:30px;letter-spacing:3px;font-weight:bold;color:#f0d6a2}
+    .tagline{font-size:12px;letter-spacing:2px;margin-top:7px;color:#e5e6df}
+    .hero{padding:25px 18px 22px;text-align:center;background:#fff}
+    .hero h1{font-family:Georgia,serif;font-size:27px;margin:0 0 8px;color:#24372f}
+    .hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+    .wrap{max-width:1050px;margin:auto;padding:18px 14px 40px}
+    .section-title{font-size:18px;margin:4px 2px 15px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px #15251c12;display:flex;flex-direction:column}
+    .photo{width:100%;aspect-ratio:1.12/1;object-fit:cover;display:block;background:#e8ece8}
+    .content{padding:13px;display:flex;flex-direction:column;gap:9px;flex:1}
+    .available{display:inline-flex;align-self:flex-start;background:#e7f7ed;color:#21834b;border-radius:20px;padding:5px 10px;font-size:11px;font-weight:bold}
+    h2{font-size:16px;line-height:1.3;margin:0;min-height:40px}
+    .description{font-size:12px;color:var(--muted);line-height:1.45;margin:0}
+    .price{font-size:19px;font-weight:800;margin-top:auto;color:#1c2923}
+    .actions{display:flex;gap:8px;margin-top:2px}
+    button{border:0;border-radius:8px;padding:11px 8px;font-weight:bold;font-size:13px;cursor:pointer}
+    .add{background:#18364d;color:white;flex:1}
+    .wa{background:var(--green2);color:white;flex:1}
+    .cartbar{position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e8e5;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -3px 15px #0000000a}
+    .cart-info{font-size:13px;color:#49514c}
+    .cart-info strong{color:#1e2b24}
+    .checkout{background:var(--green2);color:white;padding:13px 18px;white-space:nowrap}
+    footer{text-align:center;padding:20px;color:#78817b;font-size:12px}
+    @media(min-width:700px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.photo{aspect-ratio:1.2/1}.hero{padding:38px 18px}.hero h1{font-size:34px}.wrap{padding-top:26px}}
+    @media(max-width:360px){.actions{flex-direction:column}.brand{font-size:26px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">VILLA 369</div>
+    <div class="tagline">FOOD &amp; DRINKS</div>
+  </header>
+  <section class="hero">
+    <h1>Our Food Menu</h1>
+    <p>Freshly prepared favourites, made to enjoy.<br>Choose your dishes and order easily on WhatsApp.</p>
+  </section>
+
+  <main class="wrap">
+    <div class="section-title"><strong>Featured Menu</strong></div>
+    <section class="grid" id="products"></section>
+  </main>
+
+  <div class="cartbar">
+    <div class="cart-info"><strong id="cart-count">0 items</strong><br><span id="cart-total">Total: RF 0</span></div>
+    <button class="checkout" onclick="checkout()">Order via WhatsApp</button>
+  </div>
+  <footer>© <span id="year"></span> VILLA 369 · WhatsApp orders</footer>
+
+<script>
+const WHATSAPP_NUMBER = "94716455902";
+const products = [
+  {id:1,name:"Villa 369 Breakfast Set",price:1500,image:"images/breakfast.jpg",description:"Eggs, toast, fresh fruit, orange juice, tea or coffee, butter, jam and pastries."},
+  {id:2,name:"Traditional String Hopper Dinner Set",price:2000,image:"images/string-hopper-dinner.jpg",description:"White and red string hoppers served with a selection of curries, dhal and sambol."},
+  {id:3,name:"Sri Lankan Pol Rotti",price:2000,image:"images/pol-rotti.jpg",description:"Coconut rotti served with spicy chilli sambol."},
+  {id:4,name:"Traditional Sri Lankan Rice & Curry",price:2500,image:"images/rice-and-curry.webp",description:"Steamed rice, dhal, vegetable curry, greens, pol sambol, papadam and boiled egg."}
+];
+const cart = {};
+const money = n => "RF " + n.toLocaleString("en-US");
+function render(){
+  document.getElementById("products").innerHTML = products.map(p => `
+    <article class="card">
+      <img class="photo" src="${p.image}" alt="${p.name}">
+      <div class="content">
+        <span class="available">Available</span>
+        <h2>${p.name}</h2>
+        <p class="description">${p.description}</p>
+        <div class="price">${money(p.price)}</div>
+        <div class="actions">
+          <button class="wa" onclick="orderSingle(${p.id})">WhatsApp</button>
+          <button class="add" onclick="addToCart(${p.id})">Add to Cart</button>
+        </div>
+      </div>
+    </article>`).join("");
+  updateCart();
+}
+function addToCart(id){cart[id]=(cart[id]||0)+1;updateCart();}
+function updateCart(){
+  const count=Object.values(cart).reduce((a,b)=>a+b,0);
+  const total=products.reduce((sum,p)=>sum+p.price*(cart[p.id]||0),0);
+  document.getElementById("cart-count").textContent=count+" item"+(count===1?"":"s");
+  document.getElementById("cart-total").textContent="Total: "+money(total);
+}
+function sendWhatsApp(message){window.open("https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(message),"_blank");}
+function orderSingle(id){
+  const p=products.find(x=>x.id===id);
+  sendWhatsApp("Hello VILLA 369! I would like to order:\n"+p.name+"\nPrice: "+money(p.price)+"\n\nPlease confirm availability.");
+}
+function checkout(){
+  const chosen=products.filter(p=>cart[p.id]);
+  if(!chosen.length){sendWhatsApp("Hello VILLA 369! I would like to see the food menu, please.");return;}
+  let total=0;
+  let lines=chosen.map(p=>{const qty=cart[p.id];total+=p.price*qty;return p.name+" x "+qty+" — "+money(p.price*qty);});
+  sendWhatsApp("Hello VILLA 369! I would like to place an order:\n\n"+lines.join("\n")+"\n\nTotal: "+money(total)+"\n\nPlease confirm my order.");
+}
+document.getElementById("year").textContent=new Date().getFullYear();
+render();
+</script>
+</body>
+</html>
